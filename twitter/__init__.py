@@ -7,6 +7,8 @@ from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_caching import Cache
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
 # import flask_swagger_ui too
 from flask_socketio import SocketIO
@@ -14,10 +16,16 @@ from flask_socketio import SocketIO
 # from redis import Redis
 import os
 
+
+class Base(DeclarativeBase):
+    pass
+
+
 # Extensions Initialization
 
+
 jwt = JWTManager()
-db = SQLAlchemy()
+db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
 cors = CORS()
 bcrypt = Bcrypt()
@@ -28,10 +36,28 @@ socketio = SocketIO()
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        f"sqlite:///{os.path.join(app.instance_path, 'twitter.db')}"
+    )
+    mode = os.getenv("TWITTER_MODE", "development")
     if test_config is None:
         app.config.from_object("config.Config")
+        if mode == "production":
+            app.config.from_object("config.Production")
+        else:
+            app.config.from_object("config.Development")
+        try:
+            app.config.from_envvar("TWITTER_SETTINGS")
+        except RuntimeError:
+            pass
     else:
         app.config.from_mapping(test_config)
+
+    # Validate required configurations
+    if not app.config.get("SECRET_KEY"):
+        from config import Config
+
+        app.config["SECRET_KEY"] = Config.SECRET_KEY
 
     jwt.init_app(app)
     db.init_app(app)
@@ -42,8 +68,10 @@ def create_app(test_config=None):
     cache.init_app(app)
     socketio.init_app(app)
     try:
-        os.mkdir(app.instance_path)
+        os.makedirs(app.instance_path, exist_ok=True)
     except OSError:
         pass
+
+    # register blueprints here.
 
     return app
