@@ -1,16 +1,11 @@
-from typing import Optional, List
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey
 from datetime import datetime
+from typing import List, Optional
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from .. import db
-
-
-# from .Reactions import Comment, Like
-# from . import User
-
-
-def create_slug(title):
-    return ""
+from .Utils.Common import create_slug
 
 
 class Tweet(db.Model):

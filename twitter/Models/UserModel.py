@@ -1,8 +1,8 @@
-from typing import Optional, List
+from datetime import datetime
+from typing import List, Optional
 from xmlrpc.client import DateTime
 
 from sqlalchemy import Integer, String
-from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # from .Reactions import Follow, Comment, Reply
@@ -67,43 +67,43 @@ class User(db.Model):
         cascade="all, delete-orphan",
     )
 
-    def __init__(
-            self,
-            username: str,
-            fullname: str,
-            birthdate: Optional[datetime],
-            phone: Optional[str],
-            email: str,
-            password_hash: str,
-            profile_picture_url: Optional[str],
-            update_date: Optional[datetime],
-            is_verified: bool,
-            tweets: Optional[List["Tweet"]],
-            followers: Optional[List["Follow"]],
-            followings: Optional[List["Follow"]],
-            comments: Optional[List["Comment"]],
-            replies: Optional[List["Reply"]],
-            reports_received: Optional[List["Report"]],
-            reports_made: Optional[List["Report"]],
-            restrictions: Optional[List["LowPriority"]],
-    ):
-        self.username = username
-        self.fullname = fullname
-        self.birthdate = birthdate
-        self.phone = phone
-        self.email = email
-        self.password_hash = password_hash
-        self.profile_picture_url = profile_picture_url
-        self.update_date = update_date
-        self.is_verified = is_verified
-        self.tweets = tweets
-        self.followers = followers
-        self.followings = followings
-        self.comments = comments
-        self.replies = replies
-        self.reports_received = reports_received
-        self.reports_made = reports_made
-        self.restrictions = restrictions
+    # def __init__(
+    #     self,
+    #     username: str,
+    #     fullname: str,
+    #     email: str,
+    #     password_hash: str,
+    #     is_verified: bool,
+    #     birthdate: Optional[datetime] = None,
+    #     phone: Optional[str] = None,
+    #     profile_picture_url: Optional[str] = None,
+    #     update_date: Optional[datetime] = None,
+    #     tweets: Optional[List["Tweet"]] = None,
+    #     followers: Optional[List["Follow"]] = None,
+    #     followings: Optional[List["Follow"]] = None,
+    #     comments: Optional[List["Comment"]] = None,
+    #     replies: Optional[List["Reply"]] = None,
+    #     reports_received: Optional[List["Report"]] = None,
+    #     reports_made: Optional[List["Report"]] = None,
+    #     restrictions: Optional[List["LowPriority"]] = None,
+    # ):
+    #     self.username = username
+    #     self.fullname = fullname
+    #     self.birthdate = birthdate
+    #     self.phone = phone
+    #     self.email = email
+    #     self.password_hash = password_hash
+    #     self.profile_picture_url = profile_picture_url
+    #     self.update_date = update_date
+    #     self.is_verified = is_verified
+    #     self.tweets = tweets
+    #     self.followers = followers
+    #     self.followings = followings
+    #     self.comments = comments
+    #     self.replies = replies
+    #     self.reports_received = reports_received
+    #     self.reports_made = reports_made
+    #     self.restrictions = restrictions
 
     def __repr__(self):
         return f"user(id={self.id!r}, username={self.username!r},\
@@ -111,24 +111,3 @@ class User(db.Model):
 
     def __str__(self):
         return f"username:{self.fullname}-phone:{self.phone}-join_date:{self.join_date}-is_user_verified:{self.is_verified}"
-
-    def get_by_id(self, user_id):
-        return (
-            db.session.execute(db.select(self.__class__).where(self.id == user_id))
-            .scalars()
-            .first()
-        )
-
-    def get_by_username(self, username):
-        return (
-            db.session.execute(
-                db.select(self.__class__).where(self.username == username)
-            )
-            .scalars()
-            .first()
-        )
-
-    def get_by_email(self, email):
-        return db.session.execute(
-            db.select(self.__class__).where(self.email == email).first()
-        )
