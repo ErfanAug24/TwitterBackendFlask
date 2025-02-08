@@ -70,9 +70,9 @@ def create_app(test_config=None):
         pass
 
     # register blueprints here.
-    from .Routes import Auth
+    from .Routes import Auth, TweetRoute
 
-    register_blueprints([Auth.bp])
+    register_blueprints([Auth.bp, TweetRoute.bp])
     app.register_blueprint(parent)
     return app
 

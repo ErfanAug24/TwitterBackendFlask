@@ -7,6 +7,7 @@ class Config(object):
     SECRET_KEY = secrets.token_hex(32)
     JWT_SECRET_KEY = secrets.token_hex(64)
     JWT_COOKIE_SECURE = False
+    JWT_COOKIE_CSRF_PROTECT = True
     JWT_TOKEN_LOCATION = ["headers", "cookies", "json", "query_string"]
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)  # !(override them in production)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)  # !(override them in production)

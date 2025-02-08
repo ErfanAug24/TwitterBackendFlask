@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .. import db
-from .Utils.Common import create_slug
+from ..Utils.Common import create_slug
 
 
 class Tweet(db.Model):
@@ -15,7 +15,7 @@ class Tweet(db.Model):
     title: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     slug: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=create_slug(title), unique=True
+        String(255), nullable=False, default=create_slug(str(title)), unique=True
     )
     created_date: Mapped[datetime] = mapped_column(DateTime(True), default=datetime.now)
     updated_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
