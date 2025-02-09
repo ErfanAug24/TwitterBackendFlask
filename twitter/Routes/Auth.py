@@ -3,13 +3,11 @@ from ..Utils.Auth import csrf_token_required
 from datetime import datetime, timedelta, timezone
 from ..Services import TokenService
 
-# from flask.views import MethodView
 from ..Services.UserService import (
     create_basic_user,
-    add_user,
-    commit_changes,
     user_schema,
     check_password,
+    user_queries,
 )
 from flask_jwt_extended import (
     create_access_token,
@@ -23,6 +21,7 @@ from flask_jwt_extended import (
     current_user,
 )
 
+
 bp = Blueprint("auth", __name__)
 GET = ["GET"]
 POST = ["POST"]
@@ -31,6 +30,7 @@ GETandPOST = ["GET", "POST"]
 
 @bp.route("/register", methods=POST)
 def register():
+    query = user_queries()
     data = request.get_json(force=True)
     errors = user_schema.validate(data)
     if errors:
@@ -41,9 +41,15 @@ def register():
         email=data["email"],
         password=data["password"],
     )
-    add_user(user)
-    commit_changes()
+    query.get_db().add(user)
+    query.get_db().commit()
     return user_schema.dump(data), 201
+
+
+@bp.route("/test", methods=GET)
+def test():
+    query = user_queries()
+    return user_schema.dump(query.get_by_object("username", "erfan").first())
 
 
 @bp.route("/login", methods=POST)
@@ -82,12 +88,13 @@ def login():
 @bp.route("/logout", methods=["DELETE"])
 @jwt_required(verify_type=False)
 def logout():
+    query = TokenService.token_queries()
     response = jsonify({"msg": "JWT Revoked!"})
     token = get_jwt()
     jti = token["jti"]
     ttype = token["type"]
     exp_timestamp = token["exp"]
-    _token = TokenService.get_token_by_jti(jti)
+    _token = query.get_by_object("jti", jti).first()
     now = datetime.now(timezone.utc)
     TokenService.revoke_token(
         jti, _token, ttype, current_user["id"], exp_timestamp, now, "logout"
@@ -122,8 +129,4 @@ def refresh_expiring_jwts(response):
 @jwt_required(locations=["headers"], fresh=True)
 @csrf_token_required
 def protected():
-    # csrf_header = request.headers.get("X-CSRF-TOKEN")
-    # csrf_token = get_csrf_token(request.cookies.get("access_token_cookie"))
-    # if csrf_header != csrf_token:
-    #     return jsonify({"msg": "CSRF token is missing or invalid"}), 403
     return jsonify(message="Access granted with valid CSRF token!"), 200
