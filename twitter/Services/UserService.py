@@ -1,10 +1,29 @@
 from typing import Optional
-from ..sqlalchemy_conf import db
 from ..Models import User
 from ..Schemas.UserSchema import UserSchema
-from ..bcrypt_conf import bcrypt
+from ..Config.bcrypt_conf import bcrypt
+from ..Utils.Db_utils import ModelQueries
+from ..Config.sqlalchemy_conf import db
+
+
+def get_db():
+    return ModelQueries(User)
+
+
+def init_db_service(app):
+    with app.app_context():
+        get_db()
+
 
 user_schema = UserSchema(partial=True, session=db.session)
+
+
+# with current_app.app_context():
+#     print(db.session.query(User).filter_by(name="erfan").first())
+
+
+# print(get_db().get_by_object("name", "erfan").first())
+# print(get_db())
 
 
 def get_user_by_id(uid: int):
@@ -96,3 +115,7 @@ def commit_changes():
 def user_lookup_callback(_jwt_header, jwt_data):
     identity = jwt_data["sub"]
     return get_user_by_id(identity)
+
+
+def user_jwt_bridge(jwt):
+    jwt.user_lookup_loader(user_lookup_callback)

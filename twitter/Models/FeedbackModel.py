@@ -2,7 +2,7 @@ from typing import Optional, List
 from sqlalchemy import Integer, String, ForeignKey, DateTime
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .. import db
+from ..Config.sqlalchemy_conf import db
 
 
 class Feedback(db.Model):

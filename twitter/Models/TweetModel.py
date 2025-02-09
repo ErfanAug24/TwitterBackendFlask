@@ -4,7 +4,7 @@ from typing import List, Optional
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .. import db
+from ..Config.sqlalchemy_conf import db
 from ..Utils.Common import create_slug
 
 

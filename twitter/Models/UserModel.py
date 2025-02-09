@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # from .Reactions import Follow, Comment, Reply
 # from . import Tweet, Report, LowPriority
-from .. import db
+from ..Config.sqlalchemy_conf import db
 
 
 class User(db.Model):

@@ -6,9 +6,8 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_caching import Cache
-from .sqlalchemy_conf import db, register_cli
-from .jwt_conf import jwt
-from .bcrypt_conf import bcrypt
+from .Config import sqlalchemy_conf, jwt_conf, bcrypt_conf
+from .Services.UserService import init_db_service
 
 # import flask_swagger_ui too
 from flask_socketio import SocketIO
@@ -48,22 +47,23 @@ def create_app(test_config=None):
             pass
     else:
         app.config.from_mapping(test_config)
-
+    with app.app_context():
+        sqlalchemy_conf.init_app(app)
+        sqlalchemy_conf.register_cli(app)
     # Validate required configurations
     if not app.config.get("SECRET_KEY"):
         from instance.config import Config
 
         app.config["SECRET_KEY"] = Config.SECRET_KEY
-
-    jwt.init_app(app)
-    db.init_app(app)
-    register_cli(app)
+    jwt_conf.init_app(app)
+    init_db_service(app)
     migrate.init_app(app)
     cors.init_app(app)
-    bcrypt.init_app(app)
+    bcrypt_conf.init_app(app)
     limiter.init_app(app)
     cache.init_app(app)
     socketio.init_app(app)
+
     try:
         os.makedirs(app.instance_path, exist_ok=True)
     except OSError:

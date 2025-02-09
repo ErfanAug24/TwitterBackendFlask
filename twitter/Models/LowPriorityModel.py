@@ -3,7 +3,7 @@ from sqlalchemy import Integer, String, DateTime, ForeignKey, func
 from datetime import datetime, timedelta
 
 # from . import User
-from .. import db
+from ..Config.sqlalchemy_conf import db
 
 
 class LowPriority(db.Model):

@@ -2,7 +2,7 @@ from sqlalchemy import String, Integer, DateTime, ForeignKey
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List
-from .. import db
+from ..Config.sqlalchemy_conf import db
 
 
 class Token(db.Model):
