@@ -14,9 +14,7 @@ class Tweet(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    slug: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=create_slug(str(title)), unique=True
-    )
+    slug: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     created_date: Mapped[datetime] = mapped_column(DateTime(True), default=datetime.now)
     updated_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("User.id"), nullable=False)
