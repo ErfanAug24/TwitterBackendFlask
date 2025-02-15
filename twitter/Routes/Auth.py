@@ -1,12 +1,17 @@
 from flask import Blueprint, request, jsonify
 from ..Utils.Auth import csrf_token_required
 from datetime import datetime, timedelta, timezone
-from ..Services import TokenService
+from ..Services.TokenService import token_queries
+from webargs.flaskparser import use_kwargs
+from ..Schemas.UserSchema import UserSchema
+from ..Utils.Validators import schema_validator
+
+# from ..Config.sqlalchemy_conf import db
 
 from ..Services.UserService import (
-    create_basic_user,
     user_schema,
     check_password,
+    generate_passwd_hash,
     user_queries,
 )
 from flask_jwt_extended import (
@@ -29,37 +34,30 @@ GETandPOST = ["GET", "POST"]
 
 
 @bp.route("/register", methods=POST)
-def register():
+@schema_validator(UserSchema)
+def register(data):
     query = user_queries()
-    data = request.get_json(force=True)
-    errors = user_schema.validate(data)
-    if errors:
-        return jsonify(errors), 400
-    user = create_basic_user(
-        fullname=data["fullname"],
-        username=data["username"],
-        email=data["email"],
-        password=data["password"],
+    if not query.check_unique(username=data.username):
+        return jsonify({"msg": "username is not unique."}), 409
+    if not query.check_unique(email=data.email):
+        return jsonify({"msg": "email is not unique."}), 409
+    user = query.create_obj(
+        fullname=data.fullname,
+        username=data.username,
+        email=data.email,
+        password_hash=generate_passwd_hash(data.password_hash),
     )
     query.get_db().add(user)
     query.get_db().commit()
     return user_schema.dump(data), 201
 
 
-@bp.route("/test", methods=GET)
-def test():
-    query = user_queries()
-    return user_schema.dump(query.get_by_object("username", "erfan").first())
-
-
 @bp.route("/login", methods=POST)
-def login():
-    data = request.get_json(force=True)
-    errors = user_schema.validate(data)
-    user = check_password(data["email"], data["password"], request.json.get("username"))
-    if errors:
-        return jsonify(errors), 400
-    if user:
+@schema_validator(UserSchema)
+def login(data):
+    query = user_queries()
+    user = query.get_object_by_value(email=data.email).first()
+    if user and check_password(user.password_hash, data.password_hash):
         access_token = create_access_token(str(user.id), fresh=timedelta(minutes=15))
         csrf_token = get_csrf_token(access_token)
         refresh_token = create_refresh_token(str(user.id))
@@ -76,7 +74,7 @@ def login():
             }
         )
         set_access_cookies(response, access_token)
-        return response, 201
+        return response, 200
 
     response = jsonify(
         {"Auth": {"status": "failure", "reason": "entries valued unacceptable"}}
@@ -88,17 +86,26 @@ def login():
 @bp.route("/logout", methods=["DELETE"])
 @jwt_required(verify_type=False)
 def logout():
-    query = TokenService.token_queries()
+    query = token_queries()
     response = jsonify({"msg": "JWT Revoked!"})
     token = get_jwt()
     jti = token["jti"]
     ttype = token["type"]
     exp_timestamp = token["exp"]
-    _token = query.get_by_object("jti", jti).first()
+    exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+    _token = query.get_object_by_value(jti=jti).first()
     now = datetime.now(timezone.utc)
-    TokenService.revoke_token(
-        jti, _token, ttype, current_user["id"], exp_timestamp, now, "logout"
+    revoked_token = query.create_obj(
+        jti=jti,
+        token=_token,
+        ttype=ttype,
+        user_id=current_user.id,
+        expiration=exp_datetime,
+        revoked_at=now,
+        reason="logout",
     )
+    query.add_obj(revoked_token)
+    query.save_changes()
     unset_jwt_cookies(response)
     return response, 200
 
