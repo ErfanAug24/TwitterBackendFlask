@@ -5,8 +5,6 @@ from xmlrpc.client import DateTime
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-# from .Reactions import Follow, Comment, Reply
-# from . import Tweet, Report, LowPriority
 from ..Config.sqlalchemy_conf import db
 
 
@@ -19,6 +17,7 @@ class User(db.Model):
     birthdate: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(10), unique=True, nullable=True)
     email: Mapped[str] = mapped_column(String(255), unique=True)
+    old_password_hash: Mapped[str] = mapped_column(String(255), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     profile_picture_url: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True
