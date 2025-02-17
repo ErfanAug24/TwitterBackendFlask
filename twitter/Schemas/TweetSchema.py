@@ -9,9 +9,9 @@ from . import Tweet
 class TweetSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Tweet
-        include_relationships = True
+        include_relationships = False
         load_instance = True
-        include_fk = True
+        include_fk = False
 
     @validates("title")
     def validate_title(self, value):
@@ -19,7 +19,7 @@ class TweetSchema(SQLAlchemyAutoSchema):
             raise ValidationError("Too short title.")
         if re.match(r"^.{5,100}$", value) is None:
             raise ValidationError("Invalid title length.")
-        if re.match(r"^[a-zA-Z0-9 .,!?-]+$") is None:
+        if re.match(r"^[a-zA-Z0-9 .,!?-]+$", value) is None:
             raise ValidationError("Invalid title format.")
 
     @validates("body")
