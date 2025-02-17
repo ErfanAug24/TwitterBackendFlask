@@ -1,6 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-from marshmallow import validates, ValidationError
-
+from marshmallow import validates, ValidationError, fields
 from . import User
 import re
 
@@ -8,20 +7,26 @@ import re
 class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        include_relationships = True
+        include_relationships = False
+        include_fk = False
         load_instance = True
         exclude = ("password_hash",)
 
-    password = auto_field("password_hash", load_only=True)
+    email = fields.Email(required=True)
+    password = fields.Str(required=True, load_only=True, attribute="password_hash")
+    username = auto_field(required=False)
+    fullname = auto_field(required=False)
 
     @validates("username")
     def validate_username(self, value):
+        if not value:
+            raise ValidationError("Username cannot be empty.")
         if len(value) > 30:
             raise ValidationError("Username cannot be longer than 30.")
         if len(value) < 3:
             raise ValidationError("Username must be longer than 3.")
         if value.startswith(
-                ("!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "-", "=", "+")
+            ("!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "-", "=", "+")
         ):
             raise ValidationError(
                 "Username cannot start with any special operational character."
@@ -34,7 +39,7 @@ class UserSchema(SQLAlchemyAutoSchema):
             raise ValidationError("Email must be longer than 10.")
 
         if re.match(pattern, value) is None:
-            raise ValidationError("Email is invalid.")
+            raise ValidationError("Not a valid email address.")
 
     @validates("fullname")
     def validate_fullname(self, value):

@@ -115,7 +115,7 @@ def logout():
 def refresh():
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity, fresh=False)
-    return jsonify(access_token=access_token)
+    return jsonify(access_token=access_token), 200
 
 
 @bp.after_request

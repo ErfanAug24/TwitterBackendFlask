@@ -26,7 +26,7 @@ def revoke_token(
 def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
     query = token_queries()
     jti = jwt_payload["jti"]
-    token = query.get_by_object("jti", jti).first()
+    token = query.get_object_by_value(jti=jti).first()
     return token is not None
 
 
