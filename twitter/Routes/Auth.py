@@ -1,12 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from ..Utils.Auth import csrf_token_required
 from datetime import datetime, timedelta, timezone
 from ..Services.TokenService import token_queries
-from webargs.flaskparser import use_kwargs
 from ..Schemas.UserSchema import UserSchema
 from ..Utils.Validators import schema_validator
-
-# from ..Config.sqlalchemy_conf import db
 
 from ..Services.UserService import (
     user_schema,
@@ -57,6 +54,7 @@ def register(data):
 def login(data):
     query = user_queries()
     user = query.get_object_by_value(email=data.email).first()
+    print(user)
     if user and check_password(user.password_hash, data.password_hash):
         access_token = create_access_token(str(user.id), fresh=timedelta(minutes=15))
         csrf_token = get_csrf_token(access_token)

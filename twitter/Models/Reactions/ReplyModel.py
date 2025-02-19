@@ -5,10 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ...Config.sqlalchemy_conf import db
 
 
-# from .. import User
-# from . import Comment, Like
-
-
 class Reply(db.Model):
     __tablename__ = "Reply"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

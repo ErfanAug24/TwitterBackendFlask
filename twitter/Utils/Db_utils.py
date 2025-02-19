@@ -45,9 +45,9 @@ class VarCollector:
         return hasattr(self._Model, field)
 
     @validate_model_fields
-    def update_model_field_value(self, field, value):
+    def update_model_field_value(self, obj: db.Model, field, value):
         if self.get_field_value(field):
-            setattr(self._Model, field, value)
+            setattr(obj, field, value)
             self._var_dict[field] = value
 
 
@@ -83,7 +83,7 @@ class ModelQueries(VarCollector):
     @validate_model_fields
     def update_obj(self, obj: db.Model, **kwargs):
         for keyword, value in kwargs.items():
-            self.update_model_field_value(keyword, value)
+            self.update_model_field_value(obj, keyword, value)
         return obj
 
     @validate_model_fields

@@ -10,12 +10,15 @@ class UserSchema(SQLAlchemyAutoSchema):
         include_relationships = False
         include_fk = False
         load_instance = True
-        exclude = ("password_hash",)
+        exclude = ("password_hash", "old_password_hash")
 
-    email = fields.Email(required=True)
+    email = fields.Email(required=False)
     password = fields.Str(required=True, load_only=True, attribute="password_hash")
     username = auto_field(required=False)
     fullname = auto_field(required=False)
+    old_password = fields.Str(
+        required=False, load_only=True, attribute="old_password_hash"
+    )
 
     @validates("username")
     def validate_username(self, value):
@@ -35,9 +38,6 @@ class UserSchema(SQLAlchemyAutoSchema):
     @validates("email")
     def validate_email(self, value):
         pattern = r"^(?!\.)[a-zA-Z0-9._%+-]+(?<!\.)@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-        if len(value) < 10:
-            raise ValidationError("Email must be longer than 10.")
-
         if re.match(pattern, value) is None:
             raise ValidationError("Not a valid email address.")
 

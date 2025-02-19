@@ -25,8 +25,6 @@ class User(db.Model):
     join_date: Mapped[datetime] = mapped_column(default=datetime.now)
     update_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     is_verified: Mapped[bool] = mapped_column(nullable=False, default=False)
-
-    # many to one for Tweet|Reply|Report|Comment|Follow|Like|
     # Tweet Relationships
     tweets: Mapped[List["Tweet"]] = relationship(
         "Tweet", back_populates="user", foreign_keys="Tweet.user_id"
@@ -65,44 +63,6 @@ class User(db.Model):
         foreign_keys="Like.user_id",
         cascade="all, delete-orphan",
     )
-
-    # def __init__(
-    #     self,
-    #     username: str,
-    #     fullname: str,
-    #     email: str,
-    #     password_hash: str,
-    #     is_verified: bool,
-    #     birthdate: Optional[datetime] = None,
-    #     phone: Optional[str] = None,
-    #     profile_picture_url: Optional[str] = None,
-    #     update_date: Optional[datetime] = None,
-    #     tweets: Optional[List["Tweet"]] = None,
-    #     followers: Optional[List["Follow"]] = None,
-    #     followings: Optional[List["Follow"]] = None,
-    #     comments: Optional[List["Comment"]] = None,
-    #     replies: Optional[List["Reply"]] = None,
-    #     reports_received: Optional[List["Report"]] = None,
-    #     reports_made: Optional[List["Report"]] = None,
-    #     restrictions: Optional[List["LowPriority"]] = None,
-    # ):
-    #     self.username = username
-    #     self.fullname = fullname
-    #     self.birthdate = birthdate
-    #     self.phone = phone
-    #     self.email = email
-    #     self.password_hash = password_hash
-    #     self.profile_picture_url = profile_picture_url
-    #     self.update_date = update_date
-    #     self.is_verified = is_verified
-    #     self.tweets = tweets
-    #     self.followers = followers
-    #     self.followings = followings
-    #     self.comments = comments
-    #     self.replies = replies
-    #     self.reports_received = reports_received
-    #     self.reports_made = reports_made
-    #     self.restrictions = restrictions
 
     def __repr__(self):
         return f"user(id={self.id!r}, username={self.username!r},\

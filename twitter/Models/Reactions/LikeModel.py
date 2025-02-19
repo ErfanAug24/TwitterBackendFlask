@@ -1,12 +1,7 @@
-from typing import Optional, List
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Enum
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ...Config.sqlalchemy_conf import db
-
-
-# from .. import User, Tweet
-# from . import Comment, Reply
 
 
 class Like(db.Model):
@@ -14,16 +9,24 @@ class Like(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     tweet_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("Tweet.id"), nullable=False, unique=True
+        Integer,
+        ForeignKey("Tweet.id"),
+        nullable=True,
     )
     comment_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("Comment.id"), nullable=False, unique=True
+        Integer,
+        ForeignKey("Comment.id"),
+        nullable=True,
     )
     reply_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("Reply.id"), nullable=False, unique=True
+        Integer,
+        ForeignKey("Reply.id"),
+        nullable=True,
     )
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("User.id"), nullable=False, unique=True
+        Integer,
+        ForeignKey("User.id"),
+        nullable=False,
     )
     tweet: Mapped["Tweet"] = relationship(
         back_populates="likes", foreign_keys=[tweet_id]

@@ -2,8 +2,6 @@ from flask import request, jsonify
 from functools import wraps
 
 from marshmallow import ValidationError
-
-# from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from twitter.Config.sqlalchemy_conf import db
 
 

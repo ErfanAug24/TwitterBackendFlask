@@ -33,24 +33,3 @@ class Tweet(db.Model):
 
     def __str__(self):
         return f"id:{self.id} | title:{self.title} | user:{self.user}"
-
-    def get_by_id(self, tweet_id):
-        return (
-            db.session.execute(db.select(self.__class__).where(self.id == tweet_id))
-            .scalars()
-            .first()
-        )
-
-    def get_by_title(self, title):
-        return (
-            db.session.execute(db.select(self.__class__).where(self.title == title))
-            .scalars()
-            .first()
-        )
-
-    def get_by_user_id(self, user_id):
-        return (
-            db.session.execute(db.select(self.__class__).where(self.user_id == user_id))
-            .scalars()
-            .first()
-        )

@@ -1,6 +1,7 @@
 from flask import request, Blueprint, jsonify
 from flask_jwt_extended import jwt_required, current_user
 from ..Utils.Auth import csrf_token_required
+from ..Utils.Validators import schema_validator
 from ..Services.UserService import (
     upload,
     user_queries,
@@ -8,6 +9,7 @@ from ..Services.UserService import (
     generate_passwd_hash,
     check_password,
 )
+from ..Schemas.UserSchema import UserSchema
 from flask import current_app
 from datetime import datetime
 
@@ -42,47 +44,60 @@ def upload_image():
 @bp.route("/profile/password", methods=POST)
 @jwt_required(fresh=True)
 @csrf_token_required
-def update_password():
-    data = request.get_json(force=True)
-    errors = user_schema.validate(data)
-    if errors:
-        return jsonify(errors), 400
+@schema_validator(UserSchema)
+def update_password(data):
     query = user_queries()
 
-    if check_password(current_user.old_password_hash, data["new_password"]):
-        response = jsonify(
-            {"msg": "You set this password before, please choose new one."}
+    # Ensure passwords are sent as plain text and hashed inside the function
+
+    if data.password_hash == data.old_password_hash:
+        return (
+            jsonify(
+                {"msg": "You cannot use your current password as your new password!"}
+            ),
+            400,
         )
-        return response, 400
+
+    if not check_password(current_user.password_hash, data.old_password_hash):
+        return (
+            jsonify({"msg": "Access denied!"}),
+            403,
+        )
+    if current_user.old_password_hash is not None and check_password(
+        current_user.old_password_hash, data.password_hash
+    ):
+        return (
+            jsonify({"msg": "You used this password before, please create a new one."}),
+            400,
+        )
+
     query.update_obj(
         current_user,
-        old_password_hash=data["current_password"],
-        password_hash=generate_passwd_hash(data["new_password"]),
+        old_password_hash=current_user.password_hash,  # Store the previous hash
+        password_hash=generate_passwd_hash(data.password_hash),
         update_date=datetime.now(),
     )
     query.save_changes()
-    return user_schema.dump(current_user), 201
+
+    return jsonify({"msg": "Your password was successfully changed!"}), 201
 
 
 @bp.route("/profile", methods=POST)
 @jwt_required(fresh=True)
 @csrf_token_required
-def update_profile():
-    data = request.get_json(force=True)
-    errors = user_schema.validate(data)
-    if errors:
-        return jsonify(errors), 400
+@schema_validator(UserSchema)
+def update_profile(data):
     query = user_queries()
-    if not query.check_unique("username", data["username"]):
+    if not query.check_unique("username", data.username):
         return jsonify({"msg": "username should be unique"}), 400
-    if not query.check_unique("email", data["email"]):
+    if not query.check_unique("email", data.email):
         return jsonify({"msg": "email should be unique"}), 400
     query.update_obj(
         current_user,
-        username=data["username"],
-        email=data["email"],
-        phone=data["phone"],
-        birthdate=data["birthdate"],
+        username=data.username,
+        email=data.email,
+        phone=data.password,
+        birthdate=data.birthdate,
     )
     query.save_changes()
     return user_schema.dump(current_user), 201

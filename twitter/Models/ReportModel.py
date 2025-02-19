@@ -13,6 +13,12 @@ class Report(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_reporter_id = mapped_column(ForeignKey("User.id"), nullable=False)
     user_reported_id = mapped_column(ForeignKey("User.id"), nullable=False)
+    content_type: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # "user", "tweet", "comment", "reply"
+    content_id: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )  # ID of the reported entity
     reasons: Mapped[List[ReportOptions]] = mapped_column(
         Enum(ReportOptions), nullable=False
     )

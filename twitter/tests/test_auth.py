@@ -10,10 +10,10 @@ def test_post_register(client, runner):
     response = client.post(
         "/register",
         json={
-            "username": "test",
+            "username": "erfan",
             "fullname": "pytest",
-            "email": "pytest@gmail.com",
-            "password": "Py@tests12",
+            "email": "eshirkhanei261384@gmail.com",
+            "password": "Erfan@261384",
         },
     )
     assert response.status_code == 409  # created once

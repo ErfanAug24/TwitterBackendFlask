@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from enum import Enum
 
 
 def create_slug(title: str):
@@ -11,3 +12,11 @@ def create_slug(title: str):
     title = re.sub(r"[^\w\s-]", "", title).strip().lower()
     slug = re.sub(r"[-\s]+", "-", title)
     return slug
+
+
+class Rating(Enum):
+    VERYBAD = 1
+    BAD = 2
+    MEDIUM = 3
+    GOOD = 4
+    VERYGOOD = 5
